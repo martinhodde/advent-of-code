@@ -17,29 +17,51 @@ func init() {
 }
 
 func SolvePart1(input []string) string {
-	zeroCount := ZeroCount(input)
-	return fmt.Sprintf("Dial landed on position 0 a total of %d times", zeroCount)
+	onlyCountDirect := true
+	zeroCount := ZeroCount(input, onlyCountDirect)
+	return fmt.Sprintf("Dial landed directly on position 0 a total of %d times", zeroCount)
 }
 
 func SolvePart2(input []string) string {
-	return "Day 1 Part 2 not implemented"
+	onlyCountDirect := false
+	zeroCount := ZeroCount(input, onlyCountDirect)
+	return fmt.Sprintf("Dial encountered position 0 a total of %d times", zeroCount)
 }
 
 // ZeroCount takes a list of rotation instructions and returns the number of times
-// the dial lands on position 0.
-func ZeroCount(rotations []string) int {
+// the dial encounters position 0. If onlyCountDirect is true, it counts only direct landings on 0.
+func ZeroCount(rotations []string, onlyCountDirect bool) int {
 	count := 0
 	currPos := startPos
+
 	for _, move := range rotations {
 		dir, clicks, err := ParseMove(move)
 		if err != nil {
-			continue // Ignore inavalid rotations
+			continue // Just ignore inavalid rotations
 		}
 
-		currPos = RotateDial(currPos, dir, clicks)
-		if currPos == 0 {
-			count++
+		newPos := RotateDial(currPos, dir, clicks)
+
+		if onlyCountDirect {
+			if newPos == 0 {
+				count++
+			}
+		} else {
+			// Calculate the minimum number of clicks it would take to reach position 0 going in the given direction
+			// This is equivalent to the smallest k ≥ 1 such that currPos + dir*k ≡ 0 (mod dialSize)
+			minClicks := ((-dir*currPos)%dialSize + dialSize) % dialSize
+			if minClicks == 0 {
+				// If already at position 0, the next encounter would be after a full rotation
+				minClicks = dialSize
+			}
+
+			if clicks >= minClicks {
+				// Add 1 for the first encounter, then count additional full rotations
+				count += 1 + (clicks-minClicks)/dialSize
+			}
 		}
+
+		currPos = newPos
 	}
 
 	return count
@@ -70,7 +92,8 @@ func ParseMove(move string) (int, int, error) {
 	return dir, clicks, nil
 }
 
-// RotateDial calculates the new position of the dial after rotating it.
-func RotateDial(currPos, clicks, dir int) int {
-	return ((currPos + dir*clicks) + dialSize) % dialSize
+// RotateDial calculates the new position of the dial after rotation by a given number of clicks
+// in a specified direction, starting from the current position.
+func RotateDial(currPos, dir, clicks int) int {
+	return (currPos + dir*clicks + dialSize) % dialSize
 }
