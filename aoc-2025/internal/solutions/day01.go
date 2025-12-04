@@ -12,17 +12,17 @@ const dialSize = 100
 const startPos = 50
 
 func init() {
-	registry.Register(1, 1, SolvePart1)
-	registry.Register(1, 2, SolvePart2)
+	registry.Register(1, 1, SolveDay1Part1)
+	registry.Register(1, 2, SolveDay1Part2)
 }
 
-func SolvePart1(input []string) string {
+func SolveDay1Part1(input []string) string {
 	onlyCountDirect := true
 	zeroCount := ZeroCount(input, onlyCountDirect)
 	return fmt.Sprintf("Dial landed directly on position 0 a total of %d times", zeroCount)
 }
 
-func SolvePart2(input []string) string {
+func SolveDay1Part2(input []string) string {
 	onlyCountDirect := false
 	zeroCount := ZeroCount(input, onlyCountDirect)
 	return fmt.Sprintf("Dial encountered position 0 a total of %d times", zeroCount)
