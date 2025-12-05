@@ -13,17 +13,19 @@ func init() {
 }
 
 func SolveDay2Part1(input []string) string {
-	invalidIDSum := CalculateInvalidIDSum(input[0])
+	invalidIDSum := CalculateInvalidIDSum(input[0], IsInvalidIDPart1)
 	return fmt.Sprintf("The sum of all the invalid IDs is %d", invalidIDSum)
 }
 
 func SolveDay2Part2(input []string) string {
-	return ""
+	invalidIDSum := CalculateInvalidIDSum(input[0], IsInvalidIDPart2)
+	return fmt.Sprintf("The sum of all the invalid IDs is %d", invalidIDSum)
 }
 
 // CalculateInvalidIDSum takes a string representing ID ranges and
-// returns the sum of all invalid IDs within those ranges.
-func CalculateInvalidIDSum(ranges string) int {
+// returns the sum of all invalid IDs within those ranges according to the
+// specified invalid ID function.
+func CalculateInvalidIDSum(ranges string, invalidIDFunc func(int) bool) int {
 	idRanges, err := ParseIDRanges(ranges)
 	if err != nil {
 		fmt.Printf("Error parsing ID ranges: %v\n", err)
@@ -31,7 +33,7 @@ func CalculateInvalidIDSum(ranges string) int {
 	}
 
 	sum := 0
-	for _, id := range FilterInvalidIDs(idRanges) {
+	for _, id := range FilterInvalidIDs(idRanges, invalidIDFunc) {
 		sum += id
 	}
 
@@ -39,13 +41,14 @@ func CalculateInvalidIDSum(ranges string) int {
 }
 
 // FilterInvalidIDs takes a slice of [2]int representing ID ranges and
-// returns a slice of all invalid IDs within those ranges.
-func FilterInvalidIDs(ranges [][2]int) []int {
+// returns a slice of all invalid IDs within those ranges according to the
+// specified invalid ID function.
+func FilterInvalidIDs(ranges [][2]int, invalidIDFunc func(int) bool) []int {
 	var invalidIDs []int
 	for _, r := range ranges {
 		lower, upper := r[0], r[1]
 		for id := lower; id <= upper; id++ {
-			if IsInvalidID(id) {
+			if invalidIDFunc(id) {
 				invalidIDs = append(invalidIDs, id)
 			}
 		}
@@ -54,12 +57,25 @@ func FilterInvalidIDs(ranges [][2]int) []int {
 	return invalidIDs
 }
 
-// IsInvalidID checks if a given ID is invalid based on the criteria
+// IsInvalidIDPart1 checks if a given ID is invalid based on the criteria
 // of being made only of some sequence of digits repeated twice.
-func IsInvalidID(id int) bool {
+func IsInvalidIDPart1(id int) bool {
 	idString := strconv.Itoa(id)
 	numDigits := len(idString)
 	return numDigits%2 == 0 && idString[:numDigits/2] == idString[numDigits/2:]
+}
+
+// IsInvalidIDPart2 checks if a given ID is invalid based on the criteria
+// of being made only of some sequence of digits repeated at least twice.
+func IsInvalidIDPart2(id int) bool {
+	idString := strconv.Itoa(id)
+	idLength := len(idString)
+
+	// If the original ID string appears in the repeated string,
+	// excluding the first and last characters, then it is made
+	// of some sequence repeated at least twice.
+	repeatedID := idString + idString
+	return strings.Contains(repeatedID[1:2*idLength-1], idString)
 }
 
 // ParseIDRanges takes a line containing ID ranges in the format "1-3,5-7,10-15"
