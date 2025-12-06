@@ -3,6 +3,7 @@ package solutions
 import (
 	"aoc-2025/internal/registry"
 	"fmt"
+	"math"
 )
 
 func init() {
@@ -11,37 +12,64 @@ func init() {
 }
 
 func SolveDay3Part1(input []string) string {
-	outputJoltage := TotalJoltage(ParseBatteryBanks(input))
-	return fmt.Sprintf("The total maximum joltage is %d", outputJoltage)
+	numBatteries := 2
+	batteryBanks := ParseBatteryBanks(input)
+	outputJoltage := TotalJoltage(batteryBanks, numBatteries)
+	return fmt.Sprintf("The total maximum joltage using %d batteries per bank is %d", numBatteries, outputJoltage)
 }
 
 func SolveDay3Part2(input []string) string {
-	return ""
+	numBatteries := 12
+	batteryBanks := ParseBatteryBanks(input)
+	outputJoltage := TotalJoltage(batteryBanks, numBatteries)
+	return fmt.Sprintf("The total maximum joltage using %d batteries per bank is %d", numBatteries, outputJoltage)
 }
 
-// TotalJoltage calculates the total maximum joltage
-// that can be achieved from a collection of battery banks.
-func TotalJoltage(banks [][]int) int {
+// TotalJoltage calculates the total maximum joltage that can be achieved from
+// a collection of battery banks by selecting a specified number of batteries from each bank.
+func TotalJoltage(banks [][]int, numBatteries int) int {
 	totalJoltage := 0
 	for _, bank := range banks {
-		totalJoltage += MaxJoltage(bank)
+		totalJoltage += MaxJoltage(bank, numBatteries)
 	}
 
 	return totalJoltage
 }
 
-// MaxJoltage calculates the maximum joltage that can be achieved
-// by selecting two batteries from the given slice of battery joltages.
-func MaxJoltage(batteries []int) int {
-	maxJoltage := 0
-	for left := 0; left < len(batteries)-1; left++ {
-		for right := left + 1; right < len(batteries); right++ {
-			joltage := 10*batteries[left] + batteries[right]
-			maxJoltage = max(joltage, maxJoltage)
+// MaxJoltage calculates the maximum joltage that can be achieved by selecting
+// a specified number of batteries from the given bank of battery joltages.
+func MaxJoltage(batteries []int, numBatteriesLeft int) int {
+	// Memoization map to cache results
+	memo := make(map[[2]int]int)
+
+	var computeMaxJoltage func(int, int) int
+	computeMaxJoltage = func(batteryIdx int, numBatteriesLeft int) int {
+		if numBatteriesLeft == 0 {
+			// Base case: no more batteries to select
+			return 0
 		}
+		if batteryIdx == len(batteries) {
+			// Base case: still more batteries to select, but no more
+			// batteries available in the bank (invalid state)
+			return -math.MaxInt
+		}
+
+		// Memoization key: [current battery index, number of batteries left to select]
+		key := [2]int{batteryIdx, numBatteriesLeft}
+		if val, exists := memo[key]; exists {
+			return val
+		}
+
+		// Recursively compute the maximum joltage by either skipping or taking the current battery
+		skipCurrent := computeMaxJoltage(batteryIdx+1, numBatteriesLeft)
+		takeCurrent := batteries[batteryIdx]*int(math.Pow10(numBatteriesLeft-1)) +
+			computeMaxJoltage(batteryIdx+1, numBatteriesLeft-1)
+
+		memo[key] = max(skipCurrent, takeCurrent)
+		return memo[key]
 	}
 
-	return maxJoltage
+	return computeMaxJoltage(0, numBatteriesLeft)
 }
 
 // ParseBatteryBanks converts a slice of strings representing battery banks
