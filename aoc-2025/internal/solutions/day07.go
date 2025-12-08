@@ -25,6 +25,26 @@ func SolveDay7Part2(input []string) string {
 	return fmt.Sprintf("The original beam undergoes %d timelines", totalTimelines)
 }
 
+// TotalBeamSplits calculates the total number of beam splits that occur
+// as the beam traverses through the manifold represented by the input grid.
+func TotalBeamSplits(input []string) int {
+	totalSplits := 0
+
+	// Establish initial beam location
+	beamLocs := make(map[int]int)
+	beamLocs[GetBeamStartLocation(input)] = 1
+
+	// Splitters are located on every other row starting from the third row (index 2)
+	for i := 2; i < len(input); i += 2 {
+		splitterLocations := GetSplitterLocations(input[i])
+		numSplits, newBeamLocs := FindBeamSplitsAndNewBeamLocations(beamLocs, splitterLocations)
+		totalSplits += numSplits
+		beamLocs = newBeamLocs
+	}
+
+	return totalSplits
+}
+
 // TotalTimelines calculates the total number of distinct beam timelines that result
 // from the beam traversing through the manifold represented by the input grid.
 func TotalTimelines(input []string) int {
@@ -45,26 +65,6 @@ func TotalTimelines(input []string) int {
 	}
 
 	return totalTimelines
-}
-
-// TotalBeamSplits calculates the total number of beam splits that occur
-// as the beam traverses through the manifold represented by the input grid.
-func TotalBeamSplits(input []string) int {
-	totalSplits := 0
-
-	// Establish initial beam location
-	beamLocs := make(map[int]int)
-	beamLocs[GetBeamStartLocation(input)] = 1
-
-	// Splitters are located on every other row starting from the third row (index 2)
-	for i := 2; i < len(input); i += 2 {
-		splitterLocations := GetSplitterLocations(input[i])
-		numSplits, newBeamLocs := FindBeamSplitsAndNewBeamLocations(beamLocs, splitterLocations)
-		totalSplits += numSplits
-		beamLocs = newBeamLocs
-	}
-
-	return totalSplits
 }
 
 // FindBeamSplitsAndNewBeamLocations identifies the number of beam splits that occur
