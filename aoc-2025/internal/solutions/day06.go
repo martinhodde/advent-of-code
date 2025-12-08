@@ -3,6 +3,7 @@ package solutions
 import (
 	"aoc-2025/internal/registry"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -13,50 +14,101 @@ func init() {
 }
 
 func SolveDay6Part1(input []string) string {
-	allOperands, err := ParseOperands(input)
-	if err != nil {
-		return fmt.Sprintf("Error parsing operands: %v", err)
-	}
-	operators := ParseOperators(input)
-	operationSum := OperationSum(allOperands, operators)
-	return fmt.Sprintf("The total sum of all answers to the individual problems is: %d", operationSum)
+	expressionSum := ExpressionSum(ParseOperands(input), ParseOperators(input))
+	return fmt.Sprintf("The total sum of all regular math answers is: %d", expressionSum)
 }
 
 func SolveDay6Part2(input []string) string {
-	return ""
+	expressionSum := CephalopodExpressionSum(input)
+	return fmt.Sprintf("The total sum of all cephalopod math answers is: %d", expressionSum)
 }
 
-// OperationSum computes the total sum of evaluated operations across all operands.
-func OperationSum(allOperands [][]int, operators []rune) int {
+// ExpressionSum computes the total sum of all evaluated expressions.
+func ExpressionSum(allOperands [][]int, operators []rune) int {
 	total := 0
+	var operands []int
+
 	for i, operator := range operators {
-		total += EvaluateOperation(allOperands, operator, i)
+		for _, row := range allOperands {
+			operands = append(operands, row[i])
+		}
+
+		total += EvaluateExpression(operands, operator)
+		operands = operands[:0]
 	}
 
 	return total
 }
 
-// EvaluateOperation evaluates the operation for the given operator and index across all operands.
-func EvaluateOperation(allOperands [][]int, operator rune, index int) int {
+// CephalopodExpressionSum computes the total sum of all evaluated expressions, but assumes
+// the input is formatted right to left with operand digits being arranged vertically.
+func CephalopodExpressionSum(input []string) int {
+	total := 0
+	var currOperands []int
+
+	// For cephalopod expressions, it will be easier to operate on the raw input grid instead
+	// of pre-fetching parsed integer operands due to the vertical alignment of the digits
+	operatorRow := GetOperatorRowIndex(input)
+
+	// We use left-aligned operators as our signal to terminate operand accumulation for
+	// a given expression, so we iterate through the input from right to left, bottom to top
+	// to construct operands
+	for j := len(input[0]) - 1; j >= 0; j-- {
+		operand, powerOfTen := 0, 0
+		for i := operatorRow - 1; i >= 0; i-- {
+			operandChar := input[i][j]
+			if operandChar >= '0' && operandChar <= '9' {
+				digit, _ := strconv.Atoi(string(operandChar))
+				operand += digit * int(math.Pow10(powerOfTen))
+				powerOfTen++ // Move to the next digit place
+			}
+		}
+		currOperands = append(currOperands, operand)
+
+		// If we encounter a left-aligned operator, we can evaluate the aggregated expression
+		operatorChar := input[operatorRow][j]
+		if operatorChar == '*' || operatorChar == '+' {
+			total += EvaluateExpression(currOperands, rune(operatorChar))
+			currOperands = currOperands[:0]
+			j-- // Skip column of spaces between operators
+		}
+	}
+
+	return total
+}
+
+// GetOperatorRowIndex returns the index of the row that contains the operators.
+func GetOperatorRowIndex(input []string) int {
+	for i, line := range input {
+		if line[0] == '*' || line[0] == '+' {
+			return i
+		}
+	}
+
+	return -1
+}
+
+// EvaluateExpression evaluates the expression for the given operator and index across all operands.
+func EvaluateExpression(operands []int, operator rune) int {
 	var result int
 	switch operator {
 	case '+':
 		result = 0
-		for _, operands := range allOperands {
-			result += operands[index]
+		for _, operand := range operands {
+			result += operand
 		}
 	case '*':
 		result = 1
-		for _, operands := range allOperands {
-			result *= operands[index]
+		for _, operand := range operands {
+			result *= operand
 		}
 	}
 
 	return result
 }
 
-// ParseOperands parses the operands from the input lines until it encounters an operator line.
-func ParseOperands(input []string) ([][]int, error) {
+// ParseOperands parses the operand rows from the input lines until it encounters an operator line.
+func ParseOperands(input []string) [][]int {
 	var allOperands [][]int
 	for _, line := range input {
 		parts := strings.Fields(line)
@@ -66,17 +118,13 @@ func ParseOperands(input []string) ([][]int, error) {
 
 		var currOperands []int
 		for _, part := range parts {
-			num, err := strconv.Atoi(part)
-			if err != nil {
-				return nil, err
-			}
+			num, _ := strconv.Atoi(part)
 			currOperands = append(currOperands, num)
 		}
-
 		allOperands = append(allOperands, currOperands)
 	}
 
-	return allOperands, nil
+	return allOperands
 }
 
 // ParseOperators parses the operators from the end of the input lines.
