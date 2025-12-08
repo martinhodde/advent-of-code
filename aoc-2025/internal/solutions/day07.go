@@ -21,14 +21,40 @@ func SolveDay7Part1(input []string) string {
 }
 
 func SolveDay7Part2(input []string) string {
-	return ""
+	totalTimelines := TotalTimelines(input)
+	return fmt.Sprintf("The original beam undergoes %d timelines", totalTimelines)
+}
+
+// TotalTimelines calculates the total number of distinct beam timelines that result
+// from the beam traversing through the manifold represented by the input grid.
+func TotalTimelines(input []string) int {
+	// Map from beam location to count of timelines at that location
+	beamLocs := make(map[int]int)
+	beamLocs[GetBeamStartLocation(input)] = 1
+
+	// Splitters are located on every other row starting from the third row (index 2)
+	for i := 2; i < len(input); i += 2 {
+		splitterLocations := GetSplitterLocations(input[i])
+		_, beamLocs = FindBeamSplitsAndNewBeamLocations(beamLocs, splitterLocations)
+	}
+
+	// Sum up all timelines across all final beam locations
+	totalTimelines := 0
+	for _, count := range beamLocs {
+		totalTimelines += count
+	}
+
+	return totalTimelines
 }
 
 // TotalBeamSplits calculates the total number of beam splits that occur
-// as a beam traverses through the manifold represented by the input grid.
+// as the beam traverses through the manifold represented by the input grid.
 func TotalBeamSplits(input []string) int {
 	totalSplits := 0
-	beamLocs := []int{GetBeamStartLocation(input)}
+
+	// Establish initial beam location
+	beamLocs := make(map[int]int)
+	beamLocs[GetBeamStartLocation(input)] = 1
 
 	// Splitters are located on every other row starting from the third row (index 2)
 	for i := 2; i < len(input); i += 2 {
@@ -43,23 +69,24 @@ func TotalBeamSplits(input []string) int {
 
 // FindBeamSplitsAndNewBeamLocations identifies the number of beam splits that occur
 // at the current row of the manifold and computes the new beam locations after the splits.
-func FindBeamSplitsAndNewBeamLocations(beamLocations []int, splitterLocations []int) (int, []int) {
+func FindBeamSplitsAndNewBeamLocations(beamLocations map[int]int, splitterLocations []int) (int, map[int]int) {
 	numSplits := 0
-	var newBeamLocations []int
+	newBeamLocations := make(map[int]int)
 
 	// Retain beam locations that do not intersect with any splitter locations
-	for _, beamLoc := range beamLocations {
+	for beamLoc := range beamLocations {
 		if !slices.Contains(splitterLocations, beamLoc) {
-			newBeamLocations = append(newBeamLocations, beamLoc)
+			newBeamLocations[beamLoc] = beamLocations[beamLoc]
 		}
 	}
 
 	// Check each splitter location to see if it intersects with any current beam locations
 	for _, splitLoc := range splitterLocations {
-		if slices.Contains(beamLocations, splitLoc) {
+		if count, exists := beamLocations[splitLoc]; exists {
+			// Split each timeline's beam into two new beams at adjacent locations
+			newBeamLocations[splitLoc-1] += count
+			newBeamLocations[splitLoc+1] += count
 			numSplits++
-			newBeamLocations = append(newBeamLocations, splitLoc-1)
-			newBeamLocations = append(newBeamLocations, splitLoc+1)
 		}
 	}
 
