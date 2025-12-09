@@ -4,11 +4,9 @@ import (
 	"aoc-2025/internal/registry"
 	"container/heap"
 	"fmt"
+	"math"
 	"slices"
 )
-
-// Number of permitted junction connections
-const maxConnections = 1000
 
 // Connection represents a weighted edge between two junctions in 3D space.
 type Connection struct {
@@ -56,12 +54,14 @@ func (uf *UnionFind) Find(x [3]int) [3]int {
 	}
 	return uf.parent[x]
 }
-func (uf *UnionFind) Union(a, b [3]int) {
+func (uf *UnionFind) Union(a, b [3]int) bool {
 	rootA := uf.Find(a)
 	rootB := uf.Find(b)
 	if rootA != rootB {
 		uf.parent[rootB] = rootA
+		return true
 	}
+	return false
 }
 
 func init() {
@@ -71,7 +71,8 @@ func init() {
 
 func SolveDay8Part1(input []string) string {
 	positions := ParseJunctionPositions(input)
-	connections := MakeConnections(positions)
+	maxConnections := 1000
+	_, connections := MakeConnections(positions, maxConnections)
 	numCircuits := 3
 	largestCircuits := GetKLargestCircuits(connections, numCircuits)
 	product := CircuitSizeProduct(largestCircuits)
@@ -79,7 +80,10 @@ func SolveDay8Part1(input []string) string {
 }
 
 func SolveDay8Part2(input []string) string {
-	return ""
+	positions := ParseJunctionPositions(input)
+	maxConnections := math.MaxInt // No limit on connections this time - build full spanning tree
+	xCoordProduct, _ := MakeConnections(positions, maxConnections)
+	return fmt.Sprintf("The product of the x-coordinates of the last two connected junctions is %d", xCoordProduct)
 }
 
 // CircuitSizeProduct computes the product of the sizes of the provided circuits.
@@ -112,9 +116,11 @@ func GetKLargestCircuits(components map[[3]int][][3]int, k int) [][][3]int {
 	return circuits
 }
 
-// MakeConnections constructs a graph of junction connections using Kruskal's minimum spanning
-// tree algorithm, subject to the global limit on the number of connections.
-func MakeConnections(positions [][3]int) map[[3]int][][3]int {
+// MakeConnections constructs a graph of junction connections using Kruskal's minimum
+// spanning tree algorithm, subject to the specified limit on the number of connections.
+// Returns the product of the x-coordinates of the last connected junctions as well as the
+// adjacency list of the component graph.
+func MakeConnections(positions [][3]int, maxConnections int) (int, map[[3]int][][3]int) {
 	// Build a min-heap of all possible pairwise connections between junctions by distance
 	pq := &PriorityQueue{}
 	heap.Init(pq)
@@ -130,9 +136,12 @@ func MakeConnections(positions [][3]int) map[[3]int][][3]int {
 	// Connect junctions using union-find until reaching the max allowed connections
 	uf := NewUnionFind(positions)
 	numConnections := 0
+	var xCoordProduct int
 	for pq.Len() > 0 && numConnections < maxConnections {
 		conn := heap.Pop(pq).(Connection)
-		uf.Union(conn.from, conn.to)
+		if uf.Union(conn.from, conn.to) {
+			xCoordProduct = conn.from[0] * conn.to[0]
+		}
 		numConnections++
 	}
 
@@ -143,7 +152,7 @@ func MakeConnections(positions [][3]int) map[[3]int][][3]int {
 		components[root] = append(components[root], pos)
 	}
 
-	return components
+	return xCoordProduct, components
 }
 
 // ParseJunctionPositions parses a list of strings representing 3D coordinates
