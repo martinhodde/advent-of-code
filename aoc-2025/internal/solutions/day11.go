@@ -19,20 +19,20 @@ func init() {
 }
 
 func SolveDay11Part1(input []string) string {
-	connections := ParseDeviceConnections(input)
-	numPaths := NumPaths(youDevice, targetDevice, connections)
+	connections := parseDeviceConnections(input)
+	numPaths := numPaths(youDevice, targetDevice, connections)
 	return fmt.Sprintf("The number of distinct paths from %s to %s is %d", youDevice, targetDevice, numPaths)
 }
 
 func SolveDay11Part2(input []string) string {
-	connections := ParseDeviceConnections(input)
-	numPaths := NumPathsWithDACAndFFT(svrDevice, targetDevice, connections)
+	connections := parseDeviceConnections(input)
+	numPaths := numPathsWithDACAndFFT(svrDevice, targetDevice, connections)
 	return fmt.Sprintf("The number of distinct paths from %s to %s is %d", svrDevice, targetDevice, numPaths)
 }
 
-// NumPaths computes the number of distinct paths from the start device to the target device
+// numPaths computes the number of distinct paths from the start device to the target device
 // in a network of devices represented as a DAG.
-func NumPaths(start, target string, connections map[string][]string) int {
+func numPaths(start, target string, connections map[string][]string) int {
 	// Cache results in memoization table
 	memo := make(map[string]int)
 
@@ -57,10 +57,10 @@ func NumPaths(start, target string, connections map[string][]string) int {
 	return dp(start)
 }
 
-// NumPathsWithDACAndFFT computes the number of distinct paths from the start device to the target device
+// numPathsWithDACAndFFT computes the number of distinct paths from the start device to the target device
 // in a network of devices represented as a DAG. This version assumes that the "dac" and "fft" nodes
 // must be included in each valid path, in any order.
-func NumPathsWithDACAndFFT(start, target string, connections map[string][]string) int {
+func numPathsWithDACAndFFT(start, target string, connections map[string][]string) int {
 	// Cache results in memoization table
 	type state struct {
 		node       string
@@ -102,10 +102,10 @@ func NumPathsWithDACAndFFT(start, target string, connections map[string][]string
 	return dfs(start, false, false)
 }
 
-// ParseDeviceConnections parses a list of device connection strings into a map
+// parseDeviceConnections parses a list of device connection strings into a map
 // where each key is a device and the value is a list of devices it connects to.
 // The connections are unidirectional as specified in the input, resulting in a DAG.
-func ParseDeviceConnections(input []string) map[string][]string {
+func parseDeviceConnections(input []string) map[string][]string {
 	connections := make(map[string][]string)
 	for _, line := range input {
 		parts := strings.Fields(line)

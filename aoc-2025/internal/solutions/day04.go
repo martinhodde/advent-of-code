@@ -22,47 +22,47 @@ func init() {
 }
 
 func SolveDay4Part1(input []string) string {
-	grid := ParseGrid(input)
-	numPaperRolls := len(PaperRollsAccessibleByForklift(grid))
+	grid := parseGrid(input)
+	numPaperRolls := len(paperRollsAccessibleByForklift(grid))
 	return fmt.Sprintf("The number of paper rolls accessible by forklift is %d", numPaperRolls)
 }
 
 func SolveDay4Part2(input []string) string {
-	grid := ParseGrid(input)
-	numPaperRolls := NumPaperRollsRemoved(grid)
+	grid := parseGrid(input)
+	numPaperRolls := numPaperRollsRemoved(grid)
 	return fmt.Sprintf("The total number of paper rolls removed by the forklift is %d", numPaperRolls)
 }
 
-// NumPaperRollsRemoved calculates the total number of paper rolls that can be removed
+// numPaperRollsRemoved calculates the total number of paper rolls that can be removed
 // from the grid by repeatedly removing accessible paper rolls until none remain.
-func NumPaperRollsRemoved(grid [][]rune) int {
+func numPaperRollsRemoved(grid [][]rune) int {
 	removedCount := 0
-	paperRolls := PaperRollsAccessibleByForklift(grid)
+	paperRolls := paperRollsAccessibleByForklift(grid)
 	for len(paperRolls) > 0 {
 		removedCount += len(paperRolls)
-		RemovePaperRolls(grid, paperRolls)
-		paperRolls = PaperRollsAccessibleByForklift(grid)
+		removePaperRolls(grid, paperRolls)
+		paperRolls = paperRollsAccessibleByForklift(grid)
 	}
 
 	return removedCount
 }
 
-// RemovePaperRolls removes the paper rolls at the specified locations
+// removePaperRolls removes the paper rolls at the specified locations
 // from the grid by marking them as empty.
-func RemovePaperRolls(grid [][]rune, locations [][2]int) {
+func removePaperRolls(grid [][]rune, locations [][2]int) {
 	for _, loc := range locations {
 		x, y := loc[0], loc[1]
 		grid[x][y] = emptySpace
 	}
 }
 
-// PaperRollsAccessibleByForklift computes the coordinates of the paper rolls
+// paperRollsAccessibleByForklift computes the coordinates of the paper rolls
 // in the grid that can be accessed by a forklift.
-func PaperRollsAccessibleByForklift(grid [][]rune) [][2]int {
+func paperRollsAccessibleByForklift(grid [][]rune) [][2]int {
 	locations := [][2]int{}
 	for x := range len(grid) {
 		for y := range len(grid[0]) {
-			if grid[x][y] == paperRoll && IsAccessibleByForklift(grid, x, y) {
+			if grid[x][y] == paperRoll && isAccessibleByForklift(grid, x, y) {
 				locations = append(locations, [2]int{x, y})
 			}
 		}
@@ -71,9 +71,9 @@ func PaperRollsAccessibleByForklift(grid [][]rune) [][2]int {
 	return locations
 }
 
-// IsAccessibleByForklift checks if a paper roll at position (x, y) can be accessed by a forklift
+// isAccessibleByForklift checks if a paper roll at position (x, y) can be accessed by a forklift
 // based on the surrounding paper rolls. If there are 4 or more adjacent paper rolls, it is not accessible.
-func IsAccessibleByForklift(grid [][]rune, x, y int) bool {
+func isAccessibleByForklift(grid [][]rune, x, y int) bool {
 	rows, cols := len(grid), len(grid[0])
 	if x < 0 || x >= rows || y < 0 || y >= cols {
 		return false
@@ -93,8 +93,8 @@ func IsAccessibleByForklift(grid [][]rune, x, y int) bool {
 	return true
 }
 
-// ParseGrid converts the input strings into a 2D grid of runes.
-func ParseGrid(input []string) [][]rune {
+// parseGrid converts the input strings into a 2D grid of runes.
+func parseGrid(input []string) [][]rune {
 	grid := make([][]rune, len(input))
 	for i, line := range input {
 		grid[i] = []rune(line)

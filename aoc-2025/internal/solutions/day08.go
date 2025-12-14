@@ -41,7 +41,7 @@ type UnionFind struct {
 	parent map[[3]int][3]int
 }
 
-func NewUnionFind(positions [][3]int) *UnionFind {
+func newUnionFind(positions [][3]int) *UnionFind {
 	uf := &UnionFind{parent: make(map[[3]int][3]int)}
 	for _, pos := range positions {
 		uf.parent[pos] = pos
@@ -70,24 +70,24 @@ func init() {
 }
 
 func SolveDay8Part1(input []string) string {
-	positions := ParseJunctionPositions(input)
+	positions := parseJunctionPositions(input)
 	maxConnections := 1000
-	_, connections := MakeConnections(positions, maxConnections)
+	_, connections := makeConnections(positions, maxConnections)
 	numCircuits := 3
-	largestCircuits := GetKLargestCircuits(connections, numCircuits)
-	product := CircuitSizeProduct(largestCircuits)
+	largestCircuits := getKLargestCircuits(connections, numCircuits)
+	product := circuitSizeProduct(largestCircuits)
 	return fmt.Sprintf("The product of the sizes of the %d largest circuits is %d", numCircuits, product)
 }
 
 func SolveDay8Part2(input []string) string {
-	positions := ParseJunctionPositions(input)
+	positions := parseJunctionPositions(input)
 	maxConnections := math.MaxInt // No limit on connections this time - build full spanning tree
-	xCoordProduct, _ := MakeConnections(positions, maxConnections)
+	xCoordProduct, _ := makeConnections(positions, maxConnections)
 	return fmt.Sprintf("The product of the x-coordinates of the last two connected junctions is %d", xCoordProduct)
 }
 
-// CircuitSizeProduct computes the product of the sizes of the provided circuits.
-func CircuitSizeProduct(circuits [][][3]int) int {
+// circuitSizeProduct computes the product of the sizes of the provided circuits.
+func circuitSizeProduct(circuits [][][3]int) int {
 	product := 1
 	for _, circuit := range circuits {
 		product *= len(circuit)
@@ -96,9 +96,9 @@ func CircuitSizeProduct(circuits [][][3]int) int {
 	return product
 }
 
-// GetKLargestCircuits identifies the k largest circuits (connected components)
+// getKLargestCircuits identifies the k largest circuits (connected components)
 // in the junction graph represented as an adjacency list.
-func GetKLargestCircuits(components map[[3]int][][3]int, k int) [][][3]int {
+func getKLargestCircuits(components map[[3]int][][3]int, k int) [][][3]int {
 	var circuits [][][3]int
 	for _, nodes := range components {
 		circuits = append(circuits, nodes)
@@ -116,11 +116,11 @@ func GetKLargestCircuits(components map[[3]int][][3]int, k int) [][][3]int {
 	return circuits
 }
 
-// MakeConnections constructs a graph of junction connections using Kruskal's minimum
+// makeConnections constructs a graph of junction connections using Kruskal's minimum
 // spanning tree algorithm, subject to the specified limit on the number of connections.
 // Returns the product of the x-coordinates of the last connected junctions as well as the
 // adjacency list of the component graph.
-func MakeConnections(positions [][3]int, maxConnections int) (int, map[[3]int][][3]int) {
+func makeConnections(positions [][3]int, maxConnections int) (int, map[[3]int][][3]int) {
 	// Build a min-heap of all possible pairwise connections between junctions by distance
 	pq := &PriorityQueue{}
 	heap.Init(pq)
@@ -134,7 +134,7 @@ func MakeConnections(positions [][3]int, maxConnections int) (int, map[[3]int][]
 	}
 
 	// Connect junctions using union-find until reaching the max allowed connections
-	uf := NewUnionFind(positions)
+	uf := newUnionFind(positions)
 	numConnections := 0
 	var xCoordProduct int
 	for pq.Len() > 0 && numConnections < maxConnections {
@@ -155,9 +155,9 @@ func MakeConnections(positions [][3]int, maxConnections int) (int, map[[3]int][]
 	return xCoordProduct, components
 }
 
-// ParseJunctionPositions parses a list of strings representing 3D coordinates
+// parseJunctionPositions parses a list of strings representing 3D coordinates
 // into a slice of integer triplets.
-func ParseJunctionPositions(input []string) [][3]int {
+func parseJunctionPositions(input []string) [][3]int {
 	var positions [][3]int
 	for _, line := range input {
 		var x, y, z int

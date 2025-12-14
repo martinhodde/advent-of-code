@@ -14,42 +14,42 @@ func init() {
 }
 
 func SolveDay5Part1(input []string) string {
-	freshIngredientIDRanges, err := ParseFreshIngredientIDRanges(input)
+	freshIngredientIDRanges, err := parseFreshIngredientIDRanges(input)
 	if err != nil {
 		return "invalid fresh ingredient ID range: " + err.Error()
 	}
-	availableIngredientIDs, err := ParseAvailableIngredientIDs(input)
+	availableIngredientIDs, err := parseAvailableIngredientIDs(input)
 	if err != nil {
 		return "invalid available ingredient ID: " + err.Error()
 	}
-	numFreshIngredients := NumFreshIngredients(freshIngredientIDRanges, availableIngredientIDs)
+	numFreshIngredients := numFreshIngredients(freshIngredientIDRanges, availableIngredientIDs)
 	return fmt.Sprintf("The number of fresh ingredients available is %d", numFreshIngredients)
 }
 
 func SolveDay5Part2(input []string) string {
-	freshIngredientIDRanges, err := ParseFreshIngredientIDRanges(input)
+	freshIngredientIDRanges, err := parseFreshIngredientIDRanges(input)
 	if err != nil {
 		return "invalid fresh ingredient ID range: " + err.Error()
 	}
-	totalFresh := TotalFreshIngredients(freshIngredientIDRanges)
+	totalFresh := totalFreshIngredients(freshIngredientIDRanges)
 	return fmt.Sprintf("The total number of fresh ingredients across all ranges is %d", totalFresh)
 }
 
-// TotalFreshIngredients computes the total number of fresh ingredient IDs
+// totalFreshIngredients computes the total number of fresh ingredient IDs
 // across all specified ranges of fresh ingredient IDs.
-func TotalFreshIngredients(freshRanges [][2]int) int {
+func totalFreshIngredients(freshRanges [][2]int) int {
 	total := 0
-	for _, r := range MergeIngredientIDRanges(freshRanges) {
+	for _, r := range mergeIngredientIDRanges(freshRanges) {
 		total += r[1] - r[0] + 1
 	}
 	return total
 }
 
-// NumFreshIngredients counts how many available ingredient IDs
+// numFreshIngredients counts how many available ingredient IDs
 // fall within the specified ranges of fresh ingredient IDs.
-func NumFreshIngredients(freshRanges [][2]int, availableIDs []int) int {
+func numFreshIngredients(freshRanges [][2]int, availableIDs []int) int {
 	// Merge overlapping fresh ID ranges for efficient searching
-	mergedRanges := MergeIngredientIDRanges(freshRanges)
+	mergedRanges := mergeIngredientIDRanges(freshRanges)
 	freshCount := 0
 
 	// Binary search each available ID in the merged fresh ID ranges
@@ -67,8 +67,8 @@ func NumFreshIngredients(freshRanges [][2]int, availableIDs []int) int {
 	return freshCount
 }
 
-// MergeIngredientIDRanges merges overlapping or contiguous ranges of ingredient IDs.
-func MergeIngredientIDRanges(ranges [][2]int) [][2]int {
+// mergeIngredientIDRanges merges overlapping or contiguous ranges of ingredient IDs.
+func mergeIngredientIDRanges(ranges [][2]int) [][2]int {
 	// Sort ranges by start ID
 	sort.Slice(ranges, func(i, j int) bool {
 		return ranges[i][0] < ranges[j][0]
@@ -91,9 +91,9 @@ func MergeIngredientIDRanges(ranges [][2]int) [][2]int {
 	return merged
 }
 
-// ParseFreshIngredientIDRanges parses the ranges of fresh ingredient IDs
+// parseFreshIngredientIDRanges parses the ranges of fresh ingredient IDs
 // from the input, which appear before a blank line.
-func ParseFreshIngredientIDRanges(input []string) ([][2]int, error) {
+func parseFreshIngredientIDRanges(input []string) ([][2]int, error) {
 	var ranges [][2]int
 	for _, line := range input {
 		if line == "" {
@@ -116,9 +116,9 @@ func ParseFreshIngredientIDRanges(input []string) ([][2]int, error) {
 	return ranges, nil
 }
 
-// ParseAvailableIngredientIDs parses the list of available ingredient IDs
+// parseAvailableIngredientIDs parses the list of available ingredient IDs
 // from the input, which appears after a blank line.
-func ParseAvailableIngredientIDs(input []string) ([]int, error) {
+func parseAvailableIngredientIDs(input []string) ([]int, error) {
 	var available []int
 	inAvailableSection := false
 	for _, line := range input {

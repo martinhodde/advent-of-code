@@ -13,32 +13,32 @@ func init() {
 
 func SolveDay3Part1(input []string) string {
 	numBatteries := 2
-	batteryBanks := ParseBatteryBanks(input)
-	outputJoltage := TotalJoltage(batteryBanks, numBatteries)
+	batteryBanks := parseBatteryBanks(input)
+	outputJoltage := totalJoltage(batteryBanks, numBatteries)
 	return fmt.Sprintf("The total maximum joltage using %d batteries per bank is %d", numBatteries, outputJoltage)
 }
 
 func SolveDay3Part2(input []string) string {
 	numBatteries := 12
-	batteryBanks := ParseBatteryBanks(input)
-	outputJoltage := TotalJoltage(batteryBanks, numBatteries)
+	batteryBanks := parseBatteryBanks(input)
+	outputJoltage := totalJoltage(batteryBanks, numBatteries)
 	return fmt.Sprintf("The total maximum joltage using %d batteries per bank is %d", numBatteries, outputJoltage)
 }
 
-// TotalJoltage calculates the total maximum joltage that can be achieved from
+// totalJoltage calculates the total maximum joltage that can be achieved from
 // a collection of battery banks by selecting a specified number of batteries from each bank.
-func TotalJoltage(banks [][]int, numBatteries int) int {
+func totalJoltage(banks [][]int, numBatteries int) int {
 	totalJoltage := 0
 	for _, bank := range banks {
-		totalJoltage += MaxJoltage(bank, numBatteries)
+		totalJoltage += maxJoltage(bank, numBatteries)
 	}
 
 	return totalJoltage
 }
 
-// MaxJoltage calculates the maximum joltage that can be achieved by selecting
+// maxJoltage calculates the maximum joltage that can be achieved by selecting
 // a specified number of batteries from the given bank of battery joltages.
-func MaxJoltage(batteries []int, numBatteriesLeft int) int {
+func maxJoltage(batteries []int, numBatteriesLeft int) int {
 	// Memoization map to cache results
 	memo := make(map[[2]int]int)
 
@@ -72,9 +72,9 @@ func MaxJoltage(batteries []int, numBatteriesLeft int) int {
 	return computeMaxJoltage(0, numBatteriesLeft)
 }
 
-// ParseBatteryBanks converts a slice of strings representing battery banks
+// parseBatteryBanks converts a slice of strings representing battery banks
 // into a slice of slices of integers representing the joltages of the batteries.
-func ParseBatteryBanks(banks []string) [][]int {
+func parseBatteryBanks(banks []string) [][]int {
 	var batteryBanks [][]int
 	for _, bank := range banks {
 		var batteryJoltages []int

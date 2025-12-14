@@ -14,17 +14,17 @@ func init() {
 }
 
 func SolveDay6Part1(input []string) string {
-	expressionSum := ExpressionSum(ParseOperands(input), ParseOperators(input))
+	expressionSum := expressionSum(parseOperands(input), parseOperators(input))
 	return fmt.Sprintf("The total sum of all regular math answers is: %d", expressionSum)
 }
 
 func SolveDay6Part2(input []string) string {
-	expressionSum := CephalopodExpressionSum(input)
+	expressionSum := cephalopodExpressionSum(input)
 	return fmt.Sprintf("The total sum of all cephalopod math answers is: %d", expressionSum)
 }
 
-// ExpressionSum computes the total sum of all evaluated expressions.
-func ExpressionSum(allOperands [][]int, operators []rune) int {
+// expressionSum computes the total sum of all evaluated expressions.
+func expressionSum(allOperands [][]int, operators []rune) int {
 	total := 0
 	var operands []int
 
@@ -33,22 +33,22 @@ func ExpressionSum(allOperands [][]int, operators []rune) int {
 			operands = append(operands, row[i])
 		}
 
-		total += EvaluateExpression(operands, operator)
+		total += evaluateExpression(operands, operator)
 		operands = operands[:0]
 	}
 
 	return total
 }
 
-// CephalopodExpressionSum computes the total sum of all evaluated expressions, but assumes
+// cephalopodExpressionSum computes the total sum of all evaluated expressions, but assumes
 // the input is formatted right to left with operand digits being arranged vertically.
-func CephalopodExpressionSum(input []string) int {
+func cephalopodExpressionSum(input []string) int {
 	total := 0
 	var currOperands []int
 
 	// For cephalopod expressions, it will be easier to operate on the raw input grid instead
 	// of pre-fetching parsed integer operands due to the vertical alignment of the digits
-	operatorRow := GetOperatorRowIndex(input)
+	operatorRow := getOperatorRowIndex(input)
 
 	// We use left-aligned operators as our signal to terminate operand accumulation for
 	// a given expression, so we iterate through the input from right to left, bottom to top
@@ -68,7 +68,7 @@ func CephalopodExpressionSum(input []string) int {
 		// If we encounter a left-aligned operator, we can evaluate the aggregated expression
 		operatorChar := input[operatorRow][j]
 		if operatorChar == '*' || operatorChar == '+' {
-			total += EvaluateExpression(currOperands, rune(operatorChar))
+			total += evaluateExpression(currOperands, rune(operatorChar))
 			currOperands = currOperands[:0]
 			j-- // Skip column of spaces between operators
 		}
@@ -77,8 +77,8 @@ func CephalopodExpressionSum(input []string) int {
 	return total
 }
 
-// GetOperatorRowIndex returns the index of the row that contains the operators.
-func GetOperatorRowIndex(input []string) int {
+// getOperatorRowIndex returns the index of the row that contains the operators.
+func getOperatorRowIndex(input []string) int {
 	for i, line := range input {
 		if line[0] == '*' || line[0] == '+' {
 			return i
@@ -88,8 +88,8 @@ func GetOperatorRowIndex(input []string) int {
 	return -1
 }
 
-// EvaluateExpression evaluates the expression for the given operator and index across all operands.
-func EvaluateExpression(operands []int, operator rune) int {
+// evaluateExpression evaluates the expression for the given operator and index across all operands.
+func evaluateExpression(operands []int, operator rune) int {
 	var result int
 	switch operator {
 	case '+':
@@ -107,8 +107,8 @@ func EvaluateExpression(operands []int, operator rune) int {
 	return result
 }
 
-// ParseOperands parses the operand rows from the input lines until it encounters an operator line.
-func ParseOperands(input []string) [][]int {
+// parseOperands parses the operand rows from the input lines until it encounters an operator line.
+func parseOperands(input []string) [][]int {
 	var allOperands [][]int
 	for _, line := range input {
 		parts := strings.Fields(line)
@@ -127,8 +127,8 @@ func ParseOperands(input []string) [][]int {
 	return allOperands
 }
 
-// ParseOperators parses the operators from the end of the input lines.
-func ParseOperators(input []string) []rune {
+// parseOperators parses the operators from the end of the input lines.
+func parseOperators(input []string) []rune {
 	var operators []rune
 	for _, line := range input {
 		parts := strings.Fields(line)

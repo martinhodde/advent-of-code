@@ -19,20 +19,20 @@ func init() {
 }
 
 func SolveDay9Part1(input []string) string {
-	redTiles := ParseTileCoordinates(input)
-	maxRectangleArea := MaxRectangleArea(redTiles)
+	redTiles := parseTileCoordinates(input)
+	maxRectangleArea := maxRectangleArea(redTiles)
 	return fmt.Sprintf("The largest rectangle area using any two red tiles as opposite corners is %d", maxRectangleArea)
 }
 
 func SolveDay9Part2(input []string) string {
-	redTiles := ParseTileCoordinates(input)
-	maxRectangleArea := MaxInscribedRectangleArea(redTiles)
+	redTiles := parseTileCoordinates(input)
+	maxRectangleArea := maxInscribedRectangleArea(redTiles)
 	return fmt.Sprintf("The largest inscribed rectangle area using two red tiles as opposite corners is %d", maxRectangleArea)
 }
 
-// MaxRectangleArea computes the area of the largest rectangle that can be formed
+// maxRectangleArea computes the area of the largest rectangle that can be formed
 // using any two of the provided coordinates as opposite corners.
-func MaxRectangleArea(coords [][2]int) int {
+func maxRectangleArea(coords [][2]int) int {
 	maxArea := 0
 
 	// Exhaustively check all pairs of coordinates for max area
@@ -52,9 +52,9 @@ func MaxRectangleArea(coords [][2]int) int {
 	return maxArea
 }
 
-// MaxInscribedRectangleArea finds the largest rectangle inscribed within the polygon formed
+// maxInscribedRectangleArea finds the largest rectangle inscribed within the polygon formed
 // by connecting red tiles (with green tiles), where two opposite corners must be red tiles.
-func MaxInscribedRectangleArea(redTiles [][2]int) int {
+func maxInscribedRectangleArea(redTiles [][2]int) int {
 	maxArea := 0
 
 	// Check all pairs of red tiles as potential rectangle corners
@@ -72,7 +72,7 @@ func MaxInscribedRectangleArea(redTiles [][2]int) int {
 				continue // No need to check smaller areas
 			}
 
-			if IsRectangleInsidePolygon(rect, redTiles) {
+			if isRectangleInsidePolygon(rect, redTiles) {
 				maxArea = potentialArea
 			}
 		}
@@ -81,16 +81,16 @@ func MaxInscribedRectangleArea(redTiles [][2]int) int {
 	return maxArea
 }
 
-// IsRectangleInsidePolygon checks if an axis-aligned rectangle is fully inside the polygon formed
+// isRectangleInsidePolygon checks if an axis-aligned rectangle is fully inside the polygon formed
 // by connecting the red tiles (with green tiles).
-func IsRectangleInsidePolygon(rect Rectangle, polygon [][2]int) bool {
+func isRectangleInsidePolygon(rect Rectangle, polygon [][2]int) bool {
 	// Check that no polygon edge crosses through the rectangle interior
 	for i := range polygon {
 		j := (i + 1) % len(polygon) // Next vertex, wrapping around
 		start := Point{polygon[i][0], polygon[i][1]}
 		end := Point{polygon[j][0], polygon[j][1]}
 
-		if IsSegmentIntersectingRectangle(start, end, rect) {
+		if isSegmentIntersectingRectangle(start, end, rect) {
 			return false
 		}
 	}
@@ -98,9 +98,9 @@ func IsRectangleInsidePolygon(rect Rectangle, polygon [][2]int) bool {
 	return true
 }
 
-// IsSegmentIntersectingRectangle checks if an axis-aligned line segment crosses
+// isSegmentIntersectingRectangle checks if an axis-aligned line segment crosses
 // through the interior of a rectangle.
-func IsSegmentIntersectingRectangle(start, end Point, rect Rectangle) bool {
+func isSegmentIntersectingRectangle(start, end Point, rect Rectangle) bool {
 	// Terminate early if both segment endpoints are outside rectangle bounds
 	if (start.x < rect.minX && end.x < rect.minX) || (start.x > rect.maxX && end.x > rect.maxX) ||
 		(start.y < rect.minY && end.y < rect.minY) || (start.y > rect.maxY && end.y > rect.maxY) {
@@ -129,8 +129,8 @@ func IsSegmentIntersectingRectangle(start, end Point, rect Rectangle) bool {
 	return false
 }
 
-// ParseTileCoordinates parses input lines in "x,y" format into coordinate pairs.
-func ParseTileCoordinates(input []string) [][2]int {
+// parseTileCoordinates parses input lines in "x,y" format into coordinate pairs.
+func parseTileCoordinates(input []string) [][2]int {
 	var positions [][2]int
 	for _, line := range input {
 		var x, y int

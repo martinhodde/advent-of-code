@@ -18,11 +18,11 @@ type Machine struct {
 }
 
 func init() {
-	registry.Register(10, 1, solveDay10Part1)
-	registry.Register(10, 2, solveDay10Part2)
+	registry.Register(10, 1, SolveDay10Part1)
+	registry.Register(10, 2, SolveDay10Part2)
 }
 
-func solveDay10Part1(input []string) string {
+func SolveDay10Part1(input []string) string {
 	machines := parseMachineInfo(input)
 	totalPresses := buttonPressSum(machines, fewestButtonPressesToTargetLightStates)
 	return fmt.Sprintf(
@@ -31,7 +31,7 @@ func solveDay10Part1(input []string) string {
 	)
 }
 
-func solveDay10Part2(input []string) string {
+func SolveDay10Part2(input []string) string {
 	machines := parseMachineInfo(input)
 	total := buttonPressSum(machines, fewestButtonPressesToJoltageRequirements)
 	return fmt.Sprintf(
